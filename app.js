@@ -77,13 +77,13 @@ const date = (v) =>
       }).format(new Date(v))
     : "Sin fecha";
 const labels = {
-  pending: "Pendiente",
-  confirmed: "Confirmado",
-  purchasing: "En compra",
-  production: "En producción",
-  in_transit: "En camino",
-  in_warehouse: "En almacén",
-  shipped: "Enviado",
+    pending: "Pendiente de pago",
+  confirmed: "Pedido confirmado",
+  purchasing: "Comprado con seller (Asia)",
+  production: "En producción (Asia)",
+  in_transit: "En tránsito hacia México",
+  in_warehouse: "En sede México",
+  shipped: "Enviado (paquetería local)",
   delivered: "Entregado",
   cancelled: "Cancelado",
   approved: "Aprobado",
@@ -896,12 +896,33 @@ function localDate(x) {
     .toISOString()
     .slice(0, 16);
 }
+function orderTimeline(status) {
+  if (status === "cancelled")
+    return `<div class="notice warning"><b>Pedido cancelado</b></div>`;
+  const steps = [
+    ["confirmed", "1. Confirmado"],
+    ["purchasing", "2. Comprado con seller"],
+    ["in_transit", "3. Tránsito a México"],
+    ["in_warehouse", "4. En sede México"],
+    ["shipped", "5. Envío local"],
+    ["delivered", "6. Entregado"],
+  ];
+  const norm = status === "production" ? "purchasing" : status;
+  const idx = steps.findIndex(([k]) => k === norm);
+  return `<div class="timeline">${steps
+    .map(([k, label], i) => {
+      const done = idx >= i;
+      const current = idx === i;
+      return `<div class="tl-step ${done ? "done" : ""} ${current ? "current" : ""}"><span class="tl-dot">${done ? "✓" : i + 1}</span><small>${label}</small></div>`;
+    })
+    .join("")}</div>`;
+}
 function showOrder(id) {
   const o = rows("orders").find((o) => o.id === id),
     items = rows("order_items").filter((i) => i.order_id === id);
   showModal(
     "Pedido #" + String(o.order_number).padStart(4, "0"),
-    `${badge(o.status)}<p>${esc(customer(o.customer_id))} · ${date(o.created_at)}</p>${items.map((i) => `<div class="summary-line"><span>${esc(i.product_name)}<br><small>${esc(i.variant_name || "")} × ${i.quantity}</small></span><b>${money(i.quantity * i.unit_price, o.currency)}</b></div>`).join("")}<div class="summary-line total"><span>Total de productos</span><span>${money(
+    `${badge(o.status)}<p>${esc(customer(o.customer_id))} · ${date(o.created_at)}</p>${orderTimeline(o.status)}${items.map((i) => `<div class="summary-line"><span>${esc(i.product_name)}<br><small>${esc(i.variant_name || "")} × ${i.quantity}</small></span><b>${money(i.quantity * i.unit_price, o.currency)}</b></div>`).join("")}<div class="summary-line total"><span>Total de productos</span><span>${money(
       items.reduce((a, i) => a + i.quantity * i.unit_price, 0),
       o.currency,
     )}</span></div><p>${esc(o.customer_note || "")}</p>${

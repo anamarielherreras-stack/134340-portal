@@ -1215,3 +1215,49 @@ dialog::backdrop {
 .social-btn.wa:hover {
   background: #d4f3e3;
 }
+/* Línea de tiempo de rastreo internacional */
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 14px 0 18px;
+  padding: 12px;
+  background: rgba(155, 135, 245, 0.08);
+  border-radius: 14px;
+}
+.tl-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  opacity: 0.45;
+}
+.tl-step.done {
+  opacity: 1;
+}
+.tl-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #e2dcf8;
+  color: #5b4b8a;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.tl-step.done .tl-dot {
+  background: #7c65d6;
+  color: #fff;
+}
+.tl-step.current .tl-dot {
+  box-shadow: 0 0 0 3px rgba(124, 101, 214, 0.3);
+}
+.tl-step small {
+  font-size: 11px;
+  line-height: 1.2;
+  color: #4a3f6b;
+  font-weight: 600;
+}
