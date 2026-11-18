@@ -77,13 +77,33 @@ const date = (v) =>
       }).format(new Date(v))
     : "Sin fecha";
 const labels = {
-    pending: "Pendiente de pago",
-  confirmed: "Pedido confirmado",
-  purchasing: "Comprado con seller (Asia)",
-  production: "En producción (Asia)",
-  in_transit: "En tránsito hacia México",
-  in_warehouse: "En sede México",
-  shipped: "Enviado (paquetería local)",
+      // Flujo Pedido Nacional
+  nat_1: "Nacional · 1. Confirmar pedido",
+  nat_2: "Nacional · 2. Confirmar depósito",
+  nat_3: "Nacional · 3. Ordenado con proveedor",
+  nat_4: "Nacional · 4. Envío a almacén 134340",
+  nat_5: "Nacional · 5. En almacén 134340",
+  nat_6: "Nacional · 6. Armado de paquete",
+  nat_7: "Nacional · 7. Envío a tu casa",
+  nat_8: "Nacional · 8. Entregado",
+  // Flujo Pedido Internacional
+  intl_1: "Internacional · 1. Confirmar pedido",
+  intl_2: "Internacional · 2. Confirmar depósito",
+  intl_3: "Internacional · 3. Ordenado con proveedor",
+  intl_4: "Internacional · 4. Envío a almacén Coreano",
+  intl_5: "Internacional · 5. En almacén Coreano",
+  intl_6: "Internacional · 6. Envío a almacén 134340",
+  intl_7: "Internacional · 7. En almacén 134340",
+  intl_8: "Internacional · 8. Armado de paquete",
+  intl_9: "Internacional · 9. Envío a tu casa",
+  intl_10: "Internacional · 10. Entregado",
+  // Compatibilidad con pedidos anteriores
+  confirmed: "Confirmado",
+  purchasing: "En compra",
+  production: "En producción",
+  in_transit: "En camino",
+  in_warehouse: "En almacén",
+  shipped: "Enviado",
   delivered: "Entregado",
   cancelled: "Cancelado",
   approved: "Aprobado",
@@ -107,7 +127,7 @@ const labels = {
   staff: "Personal",
 };
 const badge = (v) =>
-  `<span class="badge ${["approved", "delivered", "open", "confirmed"].includes(v) ? "green" : ["in_transit", "shipped", "ready"].includes(v) ? "blue" : ["pending", "production", "preorder"].includes(v) ? "pink" : "gray"}">${esc(labels[v] || v)}</span>`;
+  `<span class="badge ${["approved", "delivered", "open", "confirmed", "nat_1", "nat_8", "intl_1", "intl_10"].includes(v) ? "green" : ["in_transit", "shipped", "ready", "nat_4", "nat_7", "intl_4", "intl_6", "intl_9"].includes(v) ? "blue" : ["pending", "production", "preorder", "nat_2", "intl_2"].includes(v) ? "pink" : "gray"}">${esc(labels[v] || v)}</span>`;
 const btn = (text, act, id = "", cls = "") =>
   `<button class="btn ${cls}" data-act="${act}" data-id="${esc(id)}">${text}</button>`;
 const rows = (t) => S.data[t] || [];
@@ -896,30 +916,52 @@ function localDate(x) {
     .toISOString()
     .slice(0, 16);
 }
+const NAT_STEPS = [
+  ["nat_1", "1. Confirmar pedido"],
+  ["nat_2", "2. Confirmar depósito"],
+  ["nat_3", "3. Ordenado con proveedor"],
+  ["nat_4", "4. Envío a almacén 134340"],
+  ["nat_5", "5. En almacén 134340"],
+  ["nat_6", "6. Armado de paquete"],
+  ["nat_7", "7. Envío a tu casa"],
+  ["nat_8", "8. Entregado"],
+];
+const INTL_STEPS = [
+  ["intl_1", "1. Confirmar pedido"],
+  ["intl_2", "2. Confirmar depósito"],
+  ["intl_3", "3. Ordenado con proveedor"],
+  ["intl_4", "4. Envío a almacén Coreano"],
+  ["intl_5", "5. En almacén Coreano"],
+  ["intl_6", "6. Envío a almacén 134340"],
+  ["intl_7", "7. En almacén 134340"],
+  ["intl_8", "8. Armado de paquete"],
+  ["intl_9", "9. Envío a tu casa"],
+  ["intl_10", "10. Entregado"],
+];
 function orderTimeline(status) {
   if (status === "cancelled")
     return `<div class="notice warning"><b>Pedido cancelado</b></div>`;
-  const steps = [
-    ["confirmed", "1. Confirmado"],
-    ["purchasing", "2. Comprado con seller"],
-    ["in_transit", "3. Tránsito a México"],
-    ["in_warehouse", "4. En sede México"],
-    ["shipped", "5. Envío local"],
-    ["delivered", "6. Entregado"],
-  ];
-  const norm = status === "production" ? "purchasing" : status;
-  const idx = steps.findIndex(([k]) => k === norm);
-  return `<div class="timeline">${steps
+  const isNat = status?.startsWith("nat_");
+  const steps = isNat ? NAT_STEPS : INTL_STEPS;
+  const idx = steps.findIndex(([k]) => k === status);
+  const typeLabel = isNat ? "Pedido Nacional" : "Pedido Internacional";
+  return `<div class="timeline-box"><span class="eyebrow">${typeLabel}</span><div class="timeline">${steps
     .map(([k, label], i) => {
       const done = idx >= i;
       const current = idx === i;
-      return `<div class="tl-step ${done ? "done" : ""} ${current ? "current" : ""}"><span class="tl-dot">${done ? "✓" : i + 1}</span><small>${label}</small></div>`;
+      return `<div class="tl-step ${done ? "done" : ""} ${current ? "current" : ""}"><span class="tl-dot">${done ? "✓" : i + 1}</span><small>${label.replace(/^\d+\.\s*/, "")}</small></div>`;
     })
-    .join("")}</div>`;
+    .join("")}</div></div>`;
 }
 function showOrder(id) {
   const o = rows("orders").find((o) => o.id === id),
     items = rows("order_items").filter((i) => i.order_id === id);
+  const allStatuses = [
+    "pending",
+    ...NAT_STEPS.map(([k]) => k),
+    ...INTL_STEPS.map(([k]) => k),
+    "cancelled",
+  ];
   showModal(
     "Pedido #" + String(o.order_number).padStart(4, "0"),
     `${badge(o.status)}<p>${esc(customer(o.customer_id))} · ${date(o.created_at)}</p>${orderTimeline(o.status)}${items.map((i) => `<div class="summary-line"><span>${esc(i.product_name)}<br><small>${esc(i.variant_name || "")} × ${i.quantity}</small></span><b>${money(i.quantity * i.unit_price, o.currency)}</b></div>`).join("")}<div class="summary-line total"><span>Total de productos</span><span>${money(
@@ -931,18 +973,8 @@ function showOrder(id) {
             "order-status",
             `<input type="hidden" name="id" value="${o.id}">${select(
               "status",
-              "Estado",
-              [
-                "pending",
-                "confirmed",
-                "purchasing",
-                "production",
-                "in_transit",
-                "in_warehouse",
-                "shipped",
-                "delivered",
-                "cancelled",
-              ].map((x) => [x, labels[x]]),
+              "Actualizar etapa del pedido",
+              allStatuses.map((x) => [x, labels[x] || x]),
               o.status,
             )}`,
             "Actualizar estado",

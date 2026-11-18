@@ -1215,15 +1215,18 @@ dialog::backdrop {
 .social-btn.wa:hover {
   background: #d4f3e3;
 }
-/* Línea de tiempo de rastreo internacional */
-.timeline {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
+/* Línea de tiempo de rastreo Nacional e Internacional */
+.timeline-box {
   margin: 14px 0 18px;
   padding: 12px;
   background: rgba(155, 135, 245, 0.08);
   border-radius: 14px;
+}
+.timeline {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px 6px;
+  margin-top: 8px;
 }
 .tl-step {
   display: flex;
@@ -1231,7 +1234,7 @@ dialog::backdrop {
   align-items: center;
   text-align: center;
   gap: 4px;
-  opacity: 0.45;
+  opacity: 0.42;
 }
 .tl-step.done {
   opacity: 1;
@@ -1253,10 +1256,10 @@ dialog::backdrop {
   color: #fff;
 }
 .tl-step.current .tl-dot {
-  box-shadow: 0 0 0 3px rgba(124, 101, 214, 0.3);
+  box-shadow: 0 0 0 3px rgba(124, 101, 214, 0.35);
 }
 .tl-step small {
-  font-size: 11px;
+  font-size: 10.5px;
   line-height: 1.2;
   color: #4a3f6b;
   font-weight: 600;
