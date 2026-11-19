@@ -1336,6 +1336,7 @@ async function handleForm(f) {
       S.authMode = "login";
       S.route = "dashboard";
       await load();
+      if (!isStaff()) showTermsModal()
       return;
     }
     if (kind === "recovery") {
@@ -1578,6 +1579,11 @@ document.addEventListener("click", async (e) => {
         return;
       case "close":
         modal.close();
+        break;
+          case "accept-terms":
+        localStorage.setItem("134340.termsAccepted", "true");
+        modal.close();
+        toast("¡Gracias por aceptar los términos y condiciones!");
         break;
       case "route":
         S.route = id;
@@ -1859,6 +1865,89 @@ function claimForm() {
       "Vincular historial",
     ),
   );
+}
+function showTermsModal() {
+  showModal(
+    "💜 TÉRMINOS Y CONDICIONES — 134340",
+    `<div class="terms-body">
+      <p>Al realizar cualquier compra, apartado, claim, o pago, <b>aceptas estos Términos y Condiciones.</b></p>
+
+      <h4>🛍️ PRODUCTOS</h4>
+      <ul>
+        <li>Manejamos productos oficiales, fanmade, réplicas, personalizados y de segunda mano.</li>
+        <li>Revisa siempre la descripción antes de comprar.</li>
+        <li>Fanmade y réplicas <b>no son oficiales</b> y pueden presentar diferencias.</li>
+        <li>Todo producto está sujeto a disponibilidad.</li>
+        <li>Hay productos que pueden manejar hasta un año de producción, pedimos paciencia.</li>
+      </ul>
+
+      <h4>💰 PAGOS</h4>
+      <ul>
+        <li><b>Todos los pagos deben registrarse en el formulario correspondiente.</b></li>
+        <li><b>Registro de Pagos:</b> productos, apartados y liquidaciones.</li>
+        <li><b>Formulario de Cargos:</b> EMS, aduana, envíos y demás cargos.</li>
+        <li>Los pagos de productos deben realizarse en la fecha indicada. En estos casos pueden aplicarse <b>multas o prórrogas</b>.</li>
+        <li>Los errores en conceptos o formularios, atraso de pago de producto: pueden generar una multa de <b>$15 MXN</b>.</li>
+        <li>Pagos a cuentas incorrectas: no nos hacemos responsables de ninguna manera.</li>
+        <li><b>Abril</b> &gt; Skincare (Yesstyle/Stylevanna)</li>
+        <li><b>Joy</b> &gt; Pagos de productos de proveedores, stock, mercari, cargos, envíos.</li>
+      </ul>
+
+      <h4>📌 APARTADOS</h4>
+      <ul>
+        <li>El apartado se confirma al recibir y registrar el anticipo.</li>
+        <li>Si no se liquida en la fecha establecida, <b>se pierde el apartado y el producto pasa a stock.</b></li>
+        <li>Los apartados no son reembolsables, salvo que se indique lo contrario.</li>
+      </ul>
+
+      <h4>🌎 EMS Y CARGOS</h4>
+      <p>Los cargos pueden incluir EMS, aduana, cruces, maniobras, envío nacional u otros gastos.</p>
+      <ul>
+        <li>Deben pagarse dentro del plazo indicado.</li>
+        <li><b>EMS y cargos NO tienen multas ni periodo de gracia.</b></li>
+        <li>Si vence el plazo sin pago, <b>se perderá toda la mercancía del pedido, pasando a stock sin derecho a reembolso.</b></li>
+      </ul>
+
+      <h4>🚚 ENVÍOS NACIONALES</h4>
+      <p>Cuando tu pedido esté listo: <b>Formulario → cotización → pago → envío.</b></p>
+      <p>Después de recibir la cotización del envío tienes <b>24 HORAS para pagar.</b></p>
+      <p>Pasadas las 24 horas, <b>la caja se abrirá y toda la mercancía del pedido pasará a stock, sin derecho a reembolso.</b></p>
+
+      <h4>📦 ALMACENAMIENTO</h4>
+      <p>Mientras tengas productos pendientes por llegar, tu mercancía podrá permanecer en resguardo.</p>
+      <p>Cuando <b>todo tu pedido esté disponible</b>, tendrás <b>15 días naturales</b> para solicitar envío o entrega. Después de este plazo, el pedido podrá considerarse abandonado y pasar a stock.</p>
+
+      <h4>❌ CANCELACIONES Y REEMBOLSOS</h4>
+      <p>Una vez confirmado el pedido con el proveedor, <b>no se aceptan cancelaciones por decisión del cliente.</b></p>
+      <p>No hay reembolso por cambio de opinión, error de compra, falta de interés o tiempos de espera.</p>
+      <p>Los reembolsos solo procederán cuando corresponda por causas ajenas al cliente, como cancelación definitiva del proveedor o imposibilidad de conseguir el producto.</p>
+
+      <h4>📢 COMUNICACIÓN</h4>
+      <p>Es responsabilidad del cliente mantenerse informado mediante los medios oficiales de 134340.</p>
+      <p><b>No estamos obligados a enviar recordatorios individuales</b> sobre pagos, cargos, formularios, fechas límite o actualizaciones.</p>
+      <p><i>Es importante que se mantenga activo en los grupos de Aviso y Seguimiento de pedidos: si se retira de los grupos sin aviso, pasa sus pedidos a stock como abandono.</i></p>
+
+      <h4>⚠️ INCIDENCIAS</h4>
+      <p>Retrasos, pérdidas, robos, daños, problemas de proveedor, paquetería o aduana pueden ocurrir por causas ajenas a 134340.</p>
+      <p>La tienda dará seguimiento y compartirá la información disponible. Las resoluciones o compensaciones dependerán del tercero responsable.</p>
+
+      <h4>🚫 ABANDONO / STOCK</h4>
+      <p>Un pedido podrá considerarse abandonado por falta de pago, falta de respuesta, falta de formularios o por exceder los plazos establecidos.</p>
+      <p>En estos casos, <b>134340 podrá liberar, vender o reincorporar la mercancía al stock.</b></p>
+      <p>Los pagos realizados previamente <b>no serán reembolsables</b>, salvo que estos T&amp;C indiquen lo contrario.</p>
+
+      <h4>🖤 BLACKLIST</h4>
+      <p>Podrá restringirse el acceso a futuras compras por incumplimientos reiterados, fraude, comprobantes falsos, abandono de pedidos o faltas de respeto al equipo o clientes.</p>
+
+      <hr style="margin:14px 0;border:none;border-top:1px solid rgba(155,135,245,0.3)">
+      <h4>💜 IMPORTANTE</h4>
+      <p><b>Comprar en 134340 significa que leíste, entendiste y aceptaste estos Términos y Condiciones.</b></p>
+    </div>
+    <div class="actions" style="margin-top:16px">
+      <button class="btn" type="button" data-act="accept-terms">Acepto los Términos y Condiciones</button>
+    </div>`,
+  );
+  modal.querySelector(".close")?.remove();
 }
 function historyRows(records) {
   if (!records.length)

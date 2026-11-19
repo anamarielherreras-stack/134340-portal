@@ -1286,3 +1286,18 @@ dialog::backdrop {
   color: #4a3f6b;
   font-weight: 600;
 }
+/* Popup de Términos y Condiciones */
+.terms-body {
+  max-height: 55vh;
+  overflow-y: auto;
+  padding-right: 6px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #4a3f6b;
+}
+.terms-body ul {
+  margin: 10px 0 0 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
