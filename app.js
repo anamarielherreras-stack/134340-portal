@@ -77,26 +77,32 @@ const date = (v) =>
       }).format(new Date(v))
     : "Sin fecha";
 const labels = {
-      // Flujo Pedido Nacional
-  nat_1: "Nacional · 1. Confirmar pedido",
-  nat_2: "Nacional · 2. Confirmar depósito",
+     // Flujo Pedido Nacional (11 pasos)
+  nat_1: "Nacional · 1. Pedido confirmado",
+  nat_2: "Nacional · 2. Depósito confirmado",
   nat_3: "Nacional · 3. Ordenado con proveedor",
-  nat_4: "Nacional · 4. Envío a almacén 134340",
-  nat_5: "Nacional · 5. En almacén 134340",
-  nat_6: "Nacional · 6. Armado de paquete",
-  nat_7: "Nacional · 7. Envío a tu casa",
-  nat_8: "Nacional · 8. Entregado",
-  // Flujo Pedido Internacional
-  intl_1: "Internacional · 1. Confirmar pedido",
-  intl_2: "Internacional · 2. Confirmar depósito",
+  nat_4: "Nacional · 4. Producto listo",
+  nat_5: "Nacional · 5. Envío a almacén 134340",
+  nat_6: "Nacional · 6. En almacén 134340",
+  nat_7: "Nacional · 7. Solicita envío local",
+  nat_8: "Nacional · 8. Cotización de envío",
+  nat_9: "Nacional · 9. Armando paquete",
+  nat_10: "Nacional · 10. Envío a tu casa",
+  nat_11: "Nacional · 11. Entregado",
+  // Flujo Pedido Internacional (13 pasos)
+  intl_1: "Internacional · 1. Pedido confirmado",
+  intl_2: "Internacional · 2. Depósito confirmado",
   intl_3: "Internacional · 3. Ordenado con proveedor",
-  intl_4: "Internacional · 4. Envío a almacén Coreano",
-  intl_5: "Internacional · 5. En almacén Coreano",
+  intl_4: "Internacional · 4. Producto listo",
+  intl_5: "Internacional · 5. Pago de EMS",
   intl_6: "Internacional · 6. Envío a almacén 134340",
-  intl_7: "Internacional · 7. En almacén 134340",
-  intl_8: "Internacional · 8. Armado de paquete",
-  intl_9: "Internacional · 9. Envío a tu casa",
-  intl_10: "Internacional · 10. Entregado",
+  intl_7: "Internacional · 7. Pago de aduana",
+  intl_8: "Internacional · 8. En almacén 134340",
+  intl_9: "Internacional · 9. Solicita envío local",
+  intl_10: "Internacional · 10. Cotización de envío",
+  intl_11: "Internacional · 11. Armando paquete",
+  intl_12: "Internacional · 12. Envío a tu casa",
+  intl_13: "Internacional · 13. Entregado",
   // Compatibilidad con pedidos anteriores
   confirmed: "Confirmado",
   purchasing: "En compra",
@@ -127,7 +133,7 @@ const labels = {
   staff: "Personal",
 };
 const badge = (v) =>
-  `<span class="badge ${["approved", "delivered", "open", "confirmed", "nat_1", "nat_8", "intl_1", "intl_10"].includes(v) ? "green" : ["in_transit", "shipped", "ready", "nat_4", "nat_7", "intl_4", "intl_6", "intl_9"].includes(v) ? "blue" : ["pending", "production", "preorder", "nat_2", "intl_2"].includes(v) ? "pink" : "gray"}">${esc(labels[v] || v)}</span>`;
+  `<span class="badge ${["approved", "delivered", "open", "confirmed", "nat_1", "nat_11", "intl_1", "intl_13"].includes(v) ? "green" : ["in_transit", "shipped", "ready", "nat_5", "nat_10", "intl_6", "intl_12"].includes(v) ? "blue" : ["pending", "production", "preorder", "nat_2", "nat_7", "nat_8", "intl_2", "intl_5", "intl_7", "intl_9", "intl_10"].includes(v) ? "pink" : "gray"}">${esc(labels[v] || v)}</span>`;
 const btn = (text, act, id = "", cls = "") =>
   `<button class="btn ${cls}" data-act="${act}" data-id="${esc(id)}">${text}</button>`;
 const rows = (t) => S.data[t] || [];
@@ -917,26 +923,32 @@ function localDate(x) {
     .slice(0, 16);
 }
 const NAT_STEPS = [
-  ["nat_1", "1. Confirmar pedido"],
-  ["nat_2", "2. Confirmar depósito"],
-  ["nat_3", "3. Ordenado con proveedor"],
-  ["nat_4", "4. Envío a almacén 134340"],
-  ["nat_5", "5. En almacén 134340"],
-  ["nat_6", "6. Armado de paquete"],
-  ["nat_7", "7. Envío a tu casa"],
-  ["nat_8", "8. Entregado"],
+  ["nat_1", "Pedido confirmado", "/assets/paso-confirmar.png"],
+  ["nat_2", "Depósito confirmado", "/assets/paso-deposito.png"],
+  ["nat_3", "Ordenado con proveedor", "/assets/paso-proveedor.png"],
+  ["nat_4", "Producto listo", "/assets/paso-listo.png"],
+  ["nat_5", "Envío a almacén 134340", "/assets/paso-envio-134340.png"],
+  ["nat_6", "En almacén 134340", "/assets/paso-almacen-134340.png"],
+  ["nat_7", "Solicita envío local", "/assets/paso-solicita-envio.png"],
+  ["nat_8", "Cotización de envío", "/assets/paso-cotizacion.png"],
+  ["nat_9", "Armando paquete", "/assets/paso-armado.png"],
+  ["nat_10", "Envío a tu casa", "/assets/paso-envio-casa.png"],
+  ["nat_11", "Entregado", "/assets/paso-entregado.png"],
 ];
 const INTL_STEPS = [
-  ["intl_1", "1. Confirmar pedido"],
-  ["intl_2", "2. Confirmar depósito"],
-  ["intl_3", "3. Ordenado con proveedor"],
-  ["intl_4", "4. Envío a almacén Coreano"],
-  ["intl_5", "5. En almacén Coreano"],
-  ["intl_6", "6. Envío a almacén 134340"],
-  ["intl_7", "7. En almacén 134340"],
-  ["intl_8", "8. Armado de paquete"],
-  ["intl_9", "9. Envío a tu casa"],
-  ["intl_10", "10. Entregado"],
+  ["intl_1", "Pedido confirmado", "/assets/paso-confirmar.png"],
+  ["intl_2", "Depósito confirmado", "/assets/paso-deposito.png"],
+  ["intl_3", "Ordenado con proveedor", "/assets/paso-proveedor.png"],
+  ["intl_4", "Producto listo", "/assets/paso-listo.png"],
+  ["intl_5", "Pago de EMS", "/assets/paso-ems.png"],
+  ["intl_6", "Envío a almacén 134340", "/assets/paso-envio-134340.png"],
+  ["intl_7", "Pago de aduana", "/assets/paso-aduana.png"],
+  ["intl_8", "En almacén 134340", "/assets/paso-almacen-134340.png"],
+  ["intl_9", "Solicita envío local", "/assets/paso-solicita-envio.png"],
+  ["intl_10", "Cotización de envío", "/assets/paso-cotizacion.png"],
+  ["intl_11", "Armando paquete", "/assets/paso-armado.png"],
+  ["intl_12", "Envío a tu casa", "/assets/paso-envio-casa.png"],
+  ["intl_13", "Entregado", "/assets/paso-entregado.png"],
 ];
 function orderTimeline(status) {
   if (status === "cancelled")
@@ -946,10 +958,10 @@ function orderTimeline(status) {
   const idx = steps.findIndex(([k]) => k === status);
   const typeLabel = isNat ? "Pedido Nacional" : "Pedido Internacional";
   return `<div class="timeline-box"><span class="eyebrow">${typeLabel}</span><div class="timeline">${steps
-    .map(([k, label], i) => {
+    .map(([k, label, img], i) => {
       const done = idx >= i;
       const current = idx === i;
-      return `<div class="tl-step ${done ? "done" : ""} ${current ? "current" : ""}"><span class="tl-dot">${done ? "✓" : i + 1}</span><small>${label.replace(/^\d+\.\s*/, "")}</small></div>`;
+      return `<div class="tl-step ${done ? "done" : ""} ${current ? "current" : ""}"><div class="tl-sticker"><img src="${img}" alt="${esc(label)}" onerror="this.src='/assets/logo.jpg'"><span class="tl-badge">${done ? "✓" : i + 1}</span></div><small>${label}</small></div>`;
     })
     .join("")}</div></div>`;
 }
