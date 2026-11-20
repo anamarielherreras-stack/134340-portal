@@ -2016,6 +2016,20 @@ function showTermsModal() {
     </div>`,
   );
   modal.querySelector(".close")?.remove();
+  function showNotifPromptModal() {
+  if (localStorage.getItem("134340.notifPrompted") === "true") return;
+  showModal(
+    "🔔 Activa tus notificaciones · 134340",
+    `<p>Entérate al instante cuando cierren preventas, lleguen cajas al almacén 134340 o se actualice tu pedido.</p>
+     <form data-form="notif-optin" style="margin-top:12px">
+       ${field("whatsapp", "Tu número de WhatsApp (opcional, 10 dígitos)", "tel", rows("customer_details").find((x) => x.customer_id === S.user?.id)?.phone || "", 'placeholder="Ej. 7441234567"')}
+       <div class="actions" style="margin-top:14px">
+         <button class="btn" type="submit">Activar notificaciones</button>
+         <button class="btn light" type="button" data-act="dismiss-notif">Ahora no</button>
+       </div>
+     </form>`,
+  );
+}
 }
 function historyRows(records) {
   if (!records.length)
