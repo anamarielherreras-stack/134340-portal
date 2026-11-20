@@ -2030,7 +2030,6 @@ function showTermsModal() {
      </form>`,
   );
 }
-}
 function historyRows(records) {
   if (!records.length)
     return empty(
