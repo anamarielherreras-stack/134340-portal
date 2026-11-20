@@ -806,7 +806,20 @@ function announcementList(list) {
     : empty("Un universo tranquilo", "Los avisos nuevos aparecerán aquí.");
 }
 function announcementsPage() {
-  return `${pageHead("Tablón de avisos", "Novedades, llegadas y fechas importantes.", can("announcements", "create") ? btn("+ Nuevo aviso", "new-announcement") : "")}${setupError()}<section class="panel">${announcementList([...rows("announcements")].sort((a, b) => b.created_at.localeCompare(a.created_at)))}</section>`;
+  const enabled = localStorage.getItem("134340.notifEnabled") === "true";
+  return `${pageHead("Notificaciones y avisos", "Novedades, llegadas al almacén y fechas importantes.", can("announcements", "create") ? btn("+ Nuevo aviso", "new-announcement") : "")}${setupError()}
+  <section class="panel" style="margin-bottom:18px">
+    <div class="panel-head">
+      <div>
+        <b style="color:${enabled ? "#1e7e4f" : "#6b5e8c"}">${enabled ? "✓ Notificaciones activadas" : "Notificaciones desactivadas"}</b>
+        <p style="margin-top:4px;font-size:13px">Recibe alertas de cierre de preventas, llegadas a sede México y actualizaciones.</p>
+      </div>
+      <button class="btn ${enabled ? "light" : ""}" type="button" data-act="toggle-push">
+        ${enabled ? "Desactivar notificaciones" : "Activar notificaciones"}
+      </button>
+    </div>
+  </section>
+  <section class="panel">${announcementList([...rows("announcements")].sort((a, b) => b.created_at.localeCompare(a.created_at)))}</section>`;
 }
 function settingsPage() {
   if (!isAdmin())
@@ -1333,10 +1346,11 @@ async function handleForm(f) {
             body: JSON.stringify({ email, password: v.password }),
           }),
         );
+         const wasSignup = S.authMode === "signup";
       S.authMode = "login";
       S.route = "dashboard";
       await load();
-      if (!isStaff()) showTermsModal()
+      if (wasSignup && !isStaff()) showTermsModal();
       return;
     }
     if (kind === "recovery") {
@@ -1510,6 +1524,26 @@ async function handleForm(f) {
         body: v.body,
       });
     }
+     if (kind === "notif-optin") {
+      localStorage.setItem("134340.notifPrompted", "true");
+      if ("Notification" in window) {
+        const perm = await Notification.requestPermission();
+        if (perm === "granted") localStorage.setItem("134340.notifEnabled", "true");
+      }
+      if (v.whatsapp?.trim()) {
+        const det = rows("customer_details").find((x) => x.customer_id === S.user.id) || {};
+        await rpc("update_my_profile", {
+          p_name: S.profile?.full_name || "Clienta",
+          p_phone: v.whatsapp.trim(),
+          p_instagram: det.instagram || null,
+          p_address: det.address || null,
+        });
+      }
+      modal.close();
+      toast("¡Preferencias de notificación guardadas!");
+      await load();
+      return;
+    }
     if (kind === "announcement")
       await insert("announcements", {
         title: v.title,
@@ -1580,11 +1614,31 @@ document.addEventListener("click", async (e) => {
       case "close":
         modal.close();
         break;
-          case "accept-terms":
+        case "accept-terms":
         localStorage.setItem("134340.termsAccepted", "true");
         modal.close();
         toast("¡Gracias por aceptar los términos y condiciones!");
+        showNotifPromptModal();
         break;
+      case "dismiss-notif":
+        localStorage.setItem("134340.notifPrompted", "true");
+        modal.close();
+        break;
+      case "toggle-push": {
+        const current = localStorage.getItem("134340.notifEnabled") === "true";
+        if (!current && "Notification" in window) {
+          const perm = await Notification.requestPermission();
+          if (perm !== "granted") {
+            toast("Permiso bloqueado en tu navegador. Actívalo en los ajustes del sitio.");
+            break;
+          }
+        }
+        localStorage.setItem("134340.notifEnabled", String(!current));
+        localStorage.setItem("134340.notifPrompted", "true");
+        toast(!current ? "Notificaciones activadas en este dispositivo." : "Notificaciones desactivadas.");
+        render();
+        break;
+      }
       case "route":
         S.route = id;
         S.search = "";
@@ -1867,6 +1921,19 @@ function claimForm() {
   );
 }
 function showTermsModal() {
+  if (localStorage.getItem("134340.notifPrompted") === "true") return;
+  showModal(
+    "🔔 Activa tus notificaciones · 134340",
+    `<p>Entérate al instante cuando cierren preventas, lleguen cajas al almacén 134340 o se actualice tu pedido.</p>
+     <form data-form="notif-optin" style="margin-top:12px">
+       ${field("whatsapp", "Tu número de WhatsApp (opcional, 10 dígitos)", "tel", rows("customer_details").find((x) => x.customer_id === S.user?.id)?.phone || "", 'placeholder="Ej. 7441234567"')}
+       <div class="actions" style="margin-top:14px">
+         <button class="btn" type="submit">Activar notificaciones</button>
+         <button class="btn light" type="button" data-act="dismiss-notif">Ahora no</button>
+       </div>
+     </form>`,
+  );
+}
   showModal(
     "💜 TÉRMINOS Y CONDICIONES — 134340",
     `<div class="terms-body">
