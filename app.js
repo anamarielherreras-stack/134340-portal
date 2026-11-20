@@ -1524,7 +1524,7 @@ async function handleForm(f) {
         body: v.body,
       });
     }
-     if (kind === "notif-optin") {
+        if (kind === "notif-optin") {
       localStorage.setItem("134340.notifPrompted", "true");
       if ("Notification" in window) {
         const perm = await Notification.requestPermission();
@@ -1614,7 +1614,7 @@ document.addEventListener("click", async (e) => {
       case "close":
         modal.close();
         break;
-        case "accept-terms":
+          case "accept-terms":
         localStorage.setItem("134340.termsAccepted", "true");
         modal.close();
         toast("¡Gracias por aceptar los términos y condiciones!");
@@ -1921,6 +1921,7 @@ function claimForm() {
   );
 }
 function showTermsModal() {
+  function showNotifPromptModal() {
   if (localStorage.getItem("134340.notifPrompted") === "true") return;
   showModal(
     "🔔 Activa tus notificaciones · 134340",
