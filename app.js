@@ -2207,3 +2207,7 @@ function masterlistView() {
   }
   return `${pageHead("Masterlist completa", "Consulta de solo lectura de la masterlist histórica.")}${S.masterlistModuleError ? `<div class="notice error" role="alert"><b>No se pudo abrir la masterlist</b><p>${esc(S.masterlistModuleError)}</p>${btn("Reintentar", "route", "masterlist", "light sm")}</div>` : '<div class="loading" role="status"><div class="loader"></div>Cargando masterlist…</div>'}`;
 }
+
+
+
+//"new Notification("💜 134340 · Your Little Universe", { body: "📦 ¡Tu pedido llegó al almacén 134340! Solicita tu envío local.", icon: "/assets/logo.jpg" });
