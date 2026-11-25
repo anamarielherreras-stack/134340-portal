@@ -16,7 +16,6 @@ const S = {
   data: {},
   search: "",
   filter: "all",
-  saleType: "all"
   busy: false,
   errors: [],
   authMode: "login",
@@ -669,18 +668,9 @@ async function refreshCatalog() {
 function landing() {
   return `<section class="brand-landing"><span class="eyebrow">TU PEQUEÑO UNIVERSO</span><img src="/assets/logo.jpg" alt="Logo oficial de 134340"><h1>134340</h1><p>Un lugar para lo que amas.</p>${btn("Entrar a mi universo", "route", "login")}<button class="landing-register" data-act="register">Crear mi cuenta</button>${socialLinks()}<span class="landing-stars" aria-hidden="true">✧ · ✦ · ✧</span></section>`;
 }
+
 function productCard(p) {
-  const vars = activeVariants(p);
-  const totalStock = vars.reduce((s, v) => s + Number(v.stock_quantity || 0), 0);
-  const photoCount = (p.image_paths || []).length;
-  const statusTag = isSoldOut(p)
-    ? '<span class="badge gray">Agotado</span>'
-    : p.status === "closed"
-      ? badge("closed")
-      : p.sale_type === "stock" && totalStock > 0
-        ? `<span class="badge green">${totalStock <= 3 ? `¡Últimas ${totalStock}!` : `${totalStock} disp.`}</span>`
-        : badge(p.sale_type);
-  return `<article class="product"><div class="product-image">${p.image_paths?.[0] ? `<img src="${esc(imageURL(p.image_paths[0]))}" alt="${esc(p.name)}" loading="lazy">` : '<img class="placeholder" src="/assets/logo.jpg" alt="Sin fotografía">'}${statusTag}${photoCount > 1 ? `<span class="photo-count">📷 ${photoCount}</span>` : ""}</div><div class="product-body"><span class="category">${esc(p.category || "Colecciones 134340")}</span><h3>${esc(p.name)}</h3><div class="meta">${p.closes_at ? "Cierre: " + date(p.closes_at) : "Consulta los detalles"}</div><div class="product-bottom"><span class="price">${money(p.price, p.currency)}</span>${btn(isSoldOut(p) ? "Ver · agotado" : "Ver detalles", "product", p.id, "soft sm")}</div></div></article>`;
+  return `<article class="product"><div class="product-image">${p.image_paths?.[0] ? `<img src="${esc(imageURL(p.image_paths[0]))}" alt="${esc(p.name)}" loading="lazy">` : '<img class="placeholder" src="/assets/logo.jpg" alt="Sin fotografía">'}${isSoldOut(p) ? '<span class="badge gray">Agotado</span>' : badge(p.status === "closed" ? "closed" : p.sale_type)}</div><div class="product-body"><span class="category">${esc(p.category || "Colecciones 134340")}</span><h3>${esc(p.name)}</h3><div class="meta">${p.closes_at ? "Cierre: " + date(p.closes_at) : "Consulta los detalles"}</div><div class="product-bottom"><span class="price">${money(p.price, p.currency)}</span>${btn(isSoldOut(p) ? "Ver · agotado" : "Ver detalles", "product", p.id, "soft sm")}</div></div></article>`;
 }
 function stat(label, value, note, icon) {
   return `<div class="stat">${ic(icon)}<small>${label}</small><strong>${value}</strong><p>${note}</p></div>`;
@@ -877,19 +867,7 @@ async function openProduct(id) {
   );
   showModal(
     p.name,
-    `${p.image_paths?.length
-        ? `<div class="gallery-main"><img class="detail-img" src="${esc(imageURL(p.image_paths[0]))}" alt="${esc(p.name)}"></div>${
-            p.image_paths.length > 1
-              ? `<div class="gallery-thumbs">${p.image_paths
-                  .map(
-                    (path, i) =>
-                      `<button type="button" class="thumb-btn ${i === 0 ? "active" : ""}" data-act="gallery-pick" data-src="${esc(imageURL(path))}" aria-label="Foto ${i + 1}"><img src="${esc(imageURL(path))}" alt="Vista ${i + 1}"></button>`,
-                  )
-                  .join("")}</div>`
-              : ""
-          }`
-        : ""
-    }${badge(p.sale_type)}<p style="white-space:pre-wrap;margin-top:12px">${esc(p.description || "Una nueva pieza para tu colección.")}</p><div class="summary-line"><span>Precio del producto</span><b>${money(p.price, p.currency)}</b></div>${p.deposit_amount ? `<div class="summary-line"><span>Apartado indicado</span><b>${money(p.deposit_amount, p.currency)}</b></div>` : ""}<p class="form-hint">EMS, aduana y envío se mostrarán como cargos separados cuando correspondan. ${p.closes_at ? "Cierre: " + date(p.closes_at) : ""}</p>${
+    `${p.image_paths?.[0] ? `<img class="detail-img" src="${esc(imageURL(p.image_paths[0]))}" alt="${esc(p.name)}">` : ""}${badge(p.sale_type)}<p style="white-space:pre-wrap;margin-top:12px">${esc(p.description || "Una nueva pieza para tu colección.")}</p><div class="summary-line"><span>Precio del producto</span><b>${money(p.price, p.currency)}</b></div>${p.deposit_amount ? `<div class="summary-line"><span>Apartado indicado</span><b>${money(p.deposit_amount, p.currency)}</b></div>` : ""}<p class="form-hint">EMS, aduana y envío se mostrarán como cargos separados cuando correspondan. ${p.closes_at ? "Cierre: " + date(p.closes_at) : ""}</p>${
       p.status === "open" &&
       (!p.closes_at || new Date(p.closes_at) > new Date())
         ? S.user
@@ -1765,13 +1743,6 @@ document.addEventListener("click", async (e) => {
       case "product":
         await openProduct(id);
         break;
-      case "gallery-pick": {
-        const mainImg = modal.querySelector(".gallery-main img");
-        if (mainImg && btnEl.dataset.src) mainImg.src = btnEl.dataset.src;
-        modal.querySelectorAll(".thumb-btn").forEach((b) => b.classList.remove("active"));
-        btnEl.classList.add("active");
-        break;
-      }
       case "login-close":
         modal.close();
         S.route = "login";
