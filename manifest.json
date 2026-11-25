@@ -1,0 +1,15 @@
+{
+  "name": "134340 · Your Little Universe",
+  "short_name": "134340",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8f6ff",
+  "theme_color": "#7c65d6",
+  "icons": [
+    {
+      "src": "/assets/logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

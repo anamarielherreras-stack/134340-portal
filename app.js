@@ -1627,33 +1627,56 @@ document.addEventListener("click", async (e) => {
         localStorage.setItem("134340.notifPrompted", "true");
         modal.close();
         break;
-       case "toggle-push": {
+      case "toggle-push": {
         const current = localStorage.getItem("134340.notifEnabled") === "true";
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+        const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+        if (isIOS && !isStandalone) {
+          showModal(
+            "📲 Instala 134340 en tu iPhone",
+            `<p>Para recibir notificaciones en iPhone, Apple pide agregar la tienda a tu pantalla de inicio:</p>
+             <ol style="margin:12px 0 0 18px;line-height:1.6">
+               <li>Toca el botón <b>Compartir</b> (el cuadrito con flecha hacia arriba en Safari).</li>
+               <li>Elige <b>"Agregar a pantalla de inicio"</b> y dale a <b>Agregar</b>.</li>
+               <li>Abre <b>134340</b> desde el ícono nuevo de tu pantalla y vuelve aquí a activar las notificaciones.</li>
+             </ol>`,
+          );
+          break;
+        }
         if (!current) {
-          if (window.OneSignalDeferred) {
-            window.OneSignalDeferred.push(async function(OneSignal) {
+          if (!window.OneSignalDeferred) {
+            toast("El servicio de notificaciones está bloqueado en este navegador.");
+            break;
+          }
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            try {
               await OneSignal.Notifications.requestPermission();
               await OneSignal.User.PushSubscription.optIn();
-            });
-          } else if ("Notification" in window) {
-            const perm = await Notification.requestPermission();
-            if (perm !== "granted") {
-              toast("Permiso bloqueado en tu navegador.");
-              break;
+              if (OneSignal.User.PushSubscription.optedIn) {
+                localStorage.setItem("134340.notifEnabled", "true");
+                localStorage.setItem("134340.notifPrompted", "true");
+                toast("¡Suscripción confirmada en OneSignal!");
+                render();
+              } else {
+                toast("No se concedió el permiso de notificaciones en tu navegador.");
+              }
+            } catch (err) {
+              toast("Error al activar: " + (err?.message || "revisa permisos del navegador"));
             }
-          }
-        } else if (window.OneSignalDeferred) {
-          window.OneSignalDeferred.push(async function(OneSignal) {
-            await OneSignal.User.PushSubscription.optOut();
           });
+        } else {
+          if (window.OneSignalDeferred) {
+            window.OneSignalDeferred.push(async function(OneSignal) {
+              await OneSignal.User.PushSubscription.optOut();
+            });
+          }
+          localStorage.setItem("134340.notifEnabled", "false");
+          toast("Notificaciones desactivadas.");
+          render();
         }
-        localStorage.setItem("134340.notifEnabled", String(!current));
-        localStorage.setItem("134340.notifPrompted", "true");
-        toast(!current ? "Notificaciones activadas en este dispositivo." : "Notificaciones desactivadas.");
-        render();
         break;
       }
-      case "route":
+        case "route":
         S.route = id;
         S.search = "";
         S.filter = id === "history" ? "order" : "all";
