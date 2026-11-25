@@ -668,9 +668,19 @@ async function refreshCatalog() {
 function landing() {
   return `<section class="brand-landing"><span class="eyebrow">TU PEQUEÑO UNIVERSO</span><img src="/assets/logo.jpg" alt="Logo oficial de 134340"><h1>134340</h1><p>Un lugar para lo que amas.</p>${btn("Entrar a mi universo", "route", "login")}<button class="landing-register" data-act="register">Crear mi cuenta</button>${socialLinks()}<span class="landing-stars" aria-hidden="true">✧ · ✦ · ✧</span></section>`;
 }
-
 function productCard(p) {
-  return `<article class="product"><div class="product-image">${p.image_paths?.[0] ? `<img src="${esc(imageURL(p.image_paths[0]))}" alt="${esc(p.name)}" loading="lazy">` : '<img class="placeholder" src="/assets/logo.jpg" alt="Sin fotografía">'}${isSoldOut(p) ? '<span class="badge gray">Agotado</span>' : badge(p.status === "closed" ? "closed" : p.sale_type)}</div><div class="product-body"><span class="category">${esc(p.category || "Colecciones 134340")}</span><h3>${esc(p.name)}</h3><div class="meta">${p.closes_at ? "Cierre: " + date(p.closes_at) : "Consulta los detalles"}</div><div class="product-bottom"><span class="price">${money(p.price, p.currency)}</span>${btn(isSoldOut(p) ? "Ver · agotado" : "Ver detalles", "product", p.id, "soft sm")}</div></div></article>`;
+  const vars = activeVariants(p);
+  const totalStock = vars.reduce((s, v) => s + Number(v.stock_quantity || 0), 0);
+  const photos = Array.isArray(p.image_paths) ? p.image_paths : [];
+  const firstPhoto = photos.length > 0 ? photos[0] : "";
+  const statusTag = isSoldOut(p)
+    ? '<span class="badge gray">Agotado</span>'
+    : p.status === "closed"
+      ? badge("closed")
+      : p.sale_type === "stock" && totalStock > 0
+        ? `<span class="badge green">${totalStock <= 3 ? `¡Últimas ${totalStock}!` : `${totalStock} disp.`}</span>`
+        : badge(p.sale_type);
+  return `<article class="product"><div class="product-image">${firstPhoto ? `<img src="${esc(imageURL(firstPhoto))}" alt="${esc(p.name)}" loading="lazy">` : '<img class="placeholder" src="/assets/logo.jpg" alt="Sin fotografía">'}${statusTag}${photos.length > 1 ? `<span class="photo-count">📷 ${photos.length}</span>` : ""}</div><div class="product-body"><span class="category">${esc(p.category || "Colecciones 134340")}</span><h3>${esc(p.name)}</h3><div class="meta">${p.closes_at ? "Cierre: " + date(p.closes_at) : "Consulta los detalles"}</div><div class="product-bottom"><span class="price">${money(p.price, p.currency)}</span>${btn(isSoldOut(p) ? "Ver · agotado" : "Ver detalles", "product", p.id, "soft sm")}</div></div></article>`;
 }
 function stat(label, value, note, icon) {
   return `<div class="stat">${ic(icon)}<small>${label}</small><strong>${value}</strong><p>${note}</p></div>`;
@@ -682,7 +692,7 @@ function dashboard() {
     shipments = rows("shipments");
   const paid = payments
     .filter((p) => p.status === "approved")
-    .reduce((a, p) => a + Number(p.amount), 0);
+    .reduce((a, p) => a + Number(p.amount), 0); 
   const currencies = [
     ...new Set(
       payments
