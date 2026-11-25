@@ -2040,6 +2040,28 @@ function formatLegacyValue(d) {
   }
   return s;
 }
+function historyRows(records) {
+  if (!records.length)
+    return empty(
+      "Sin registros anteriores disponibles",
+      "Si ya vinculaste tu clave, la administradora puede revisar las referencias pendientes de importar.",
+    );
+  return records
+    .map((r) => {
+      const relation =
+        r.kind === "order"
+          ? r.source_row
+            ? `ID de pedido: ${r.source_row}`
+            : "Sin ID de pedido registrado"
+          : r.order_id
+            ? `Pedido relacionado: ${r.order_id}`
+            : r.kind === "payment"
+              ? "Sin ID de pedido individual · no se asigna a un cargo automáticamente"
+              : "Sin pedido relacionado";
+      return `<article class="history-record"><div class="panel-head"><div><span class="eyebrow">${esc({ order: "Pedido anterior", charge: "Cargo anterior", payment: "Pago anterior", shipment: "Envío anterior", warehouse: "Almacenamiento anterior", logistics: "Etapa logística anterior" }[r.kind] || "Registro anterior")}</span><h3 style="margin:7px 0">${esc(r.section || r.sheet_name)}</h3><small>${esc(r.sheet_name)} · ${r.from_sheets ? "Referencia" : "fila"} ${esc(r.source_row)}${r.customer_code ? " · Clienta " + esc(r.customer_code) : ""}</small><p class="form-hint">${esc(relation)}</p></div></div><div class="history-fields">${(r.details || []).map((d) => `<div><small>${esc(d.label)}</small><p>${esc(formatLegacyValue(d))}</p></div>`).join("")}</div></article>`;
+    })
+    .join("");
+}
 function historyPage() {
   const linked = linkedLegacy();
   const all = rows("legacy_history");
