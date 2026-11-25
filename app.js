@@ -1524,11 +1524,14 @@ async function handleForm(f) {
         body: v.body,
       });
     }
-        if (kind === "notif-optin") {
+    if (kind === "notif-optin") {
       localStorage.setItem("134340.notifPrompted", "true");
-      if ("Notification" in window) {
-        const perm = await Notification.requestPermission();
-        if (perm === "granted") localStorage.setItem("134340.notifEnabled", "true");
+      localStorage.setItem("134340.notifEnabled", "true");
+      if (window.OneSignalDeferred) {
+        window.OneSignalDeferred.push(async function(OneSignal) {
+          await OneSignal.Notifications.requestPermission();
+          await OneSignal.User.PushSubscription.optIn();
+        });
       }
       if (v.whatsapp?.trim()) {
         const det = rows("customer_details").find((x) => x.customer_id === S.user.id) || {};
@@ -1540,7 +1543,7 @@ async function handleForm(f) {
         });
       }
       modal.close();
-      toast("¡Preferencias de notificación guardadas!");
+      toast("¡Notificaciones activadas y preferencias guardadas!");
       await load();
       return;
     }
@@ -1624,14 +1627,25 @@ document.addEventListener("click", async (e) => {
         localStorage.setItem("134340.notifPrompted", "true");
         modal.close();
         break;
-      case "toggle-push": {
+       case "toggle-push": {
         const current = localStorage.getItem("134340.notifEnabled") === "true";
-        if (!current && "Notification" in window) {
-          const perm = await Notification.requestPermission();
-          if (perm !== "granted") {
-            toast("Permiso bloqueado en tu navegador. Actívalo en los ajustes del sitio.");
-            break;
+        if (!current) {
+          if (window.OneSignalDeferred) {
+            window.OneSignalDeferred.push(async function(OneSignal) {
+              await OneSignal.Notifications.requestPermission();
+              await OneSignal.User.PushSubscription.optIn();
+            });
+          } else if ("Notification" in window) {
+            const perm = await Notification.requestPermission();
+            if (perm !== "granted") {
+              toast("Permiso bloqueado en tu navegador.");
+              break;
+            }
           }
+        } else if (window.OneSignalDeferred) {
+          window.OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.User.PushSubscription.optOut();
+          });
         }
         localStorage.setItem("134340.notifEnabled", String(!current));
         localStorage.setItem("134340.notifPrompted", "true");
@@ -2229,7 +2243,3 @@ function masterlistView() {
   }
   return `${pageHead("Masterlist completa", "Consulta de solo lectura de la masterlist histórica.")}${S.masterlistModuleError ? `<div class="notice error" role="alert"><b>No se pudo abrir la masterlist</b><p>${esc(S.masterlistModuleError)}</p>${btn("Reintentar", "route", "masterlist", "light sm")}</div>` : '<div class="loading" role="status"><div class="loader"></div>Cargando masterlist…</div>'}`;
 }
-
-
-
-//"new Notification("💜 134340 · Your Little Universe", { body: "📦 ¡Tu pedido llegó al almacén 134340! Solicita tu envío local.", icon: "/assets/logo.jpg" });
