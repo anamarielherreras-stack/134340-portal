@@ -1950,11 +1950,13 @@ document.addEventListener("change", (e) => {
       if (Number(q.value) > Number(q.max)) q.value = q.max;
     }
   }
-  if (e.target.id === "filter-select") {
-    S.filter = e.target.value;
-    render();
-  }
-});
+  if (e.target.name === "quantity" && e.target.closest('form[data-form="purchase"]')) {
+    const max = Number(e.target.max || 100);
+    if (Number(e.target.value) > max) {
+      e.target.value = String(max);
+      toast(`Solo hay ${max} unidad(es) disponible(s) de esta opción.`);
+    }
+  });
 async function start() {
   const h = new URLSearchParams(location.hash.slice(1));
   if (h.has("error") || h.has("error_code")) {
