@@ -1937,19 +1937,6 @@ document.addEventListener("input", (e) => {
     n?.setSelectionRange(start, start);
   }
 });
-document.addEventListener("change", (e) => {
- if (e.target.name === "variant_id" && e.target.closest('form[data-form="purchase"]')) {
-    const f = e.target.closest("form");
-    const opt = e.target.selectedOptions[0];
-    const max = Math.max(1, Math.min(100, Number(opt?.dataset.stock || 100)));
-    const qty = f.querySelector('input[name="quantity"]');
-    if (qty) {
-      qty.max = String(max);
-      if (Number(qty.value) > max) qty.value = String(max);
-    }
-  }
-  if (e.target.name === "quantity" && e.target.closest('form[data-form="purchase"]')) {
-    const max = Number(e.target.max || 100);
     if (Number(e.target.value) > max) {
       e.target.value = String(max);
       toast(`Solo hay ${max} unidad(es) disponible(s) de esta opción.`);
