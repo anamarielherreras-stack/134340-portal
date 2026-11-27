@@ -930,15 +930,17 @@ const PRODUCT_CATEGORIES = [
   ["Personalizados", "Personalizados"],
 ];
 function warnInternationalProduct() {
-  const box = document.createElement("div");
-  box.style.cssText = "position:fixed;inset:0;background:rgba(34,27,53,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:99999";
-  box.innerHTML = `<div style="background:#fff;border-radius:20px;max-width:400px;width:100%;padding:22px;box-shadow:0 18px 40px rgba(34,27,53,.28);text-align:center">
-    <h3 style="margin:0 0 10px;color:#5b4b8a">🌎 Aviso de Compra Internacional</h3>
-    <p style="font-size:14px;line-height:1.5;color:#4a3f6b;margin:0 0 18px">Esta compra es internacional por lo que el precio publicado no es el precio final. Durante el proceso de compra se añadirán dos pagos más: <b>EMS</b> y <b>Aduana</b>.</p>
-    <button type="button" class="btn" style="width:100%">Entendido, continuar</button>
-  </div>`;
-  box.querySelector("button").onclick = () => box.remove();
-  document.body.appendChild(box);
+  const dlg = document.createElement("dialog");
+  dlg.style.cssText = "border:none;border-radius:20px;max-width:400px;width:90%;padding:22px;box-shadow:0 18px 40px rgba(34,27,53,.35);text-align:center;background:#fff;color:#4a3f6b;margin:auto";
+  dlg.innerHTML = `<h3 style="margin:0 0 10px;color:#5b4b8a">🌎 Aviso de Compra Internacional</h3>
+    <p style="font-size:14px;line-height:1.5;margin:0 0 18px">Esta compra es internacional por lo que el precio publicado no es el precio final. Durante el proceso de compra se añadirán dos pagos más: <b>EMS</b> y <b>Aduana</b>.</p>
+    <button type="button" class="btn" style="width:100%">Entendido, continuar</button>`;
+  dlg.querySelector("button").onclick = () => {
+    dlg.close();
+    dlg.remove();
+  };
+  document.body.appendChild(dlg);
+  dlg.showModal();
 }
 function productForm(p = {}) {
   const cats =
