@@ -897,24 +897,24 @@ async function openProduct(id) {
         ? S.user
           ? isSoldOut(p)
             ? '<div class="notice"><b>Agotado</b><p>Las piezas disponibles ya fueron apartadas. Puedes seguir explorando la tienda.</p></div>'
-            : available.length
+                      : available.length
               ? form(
                   "purchase",
-                  `<input type="hidden" name="product_id" value="${p.id}">${select(
-                    "variant_id",
-                    "Elige tu opción",
-                    available.map((v) => [
-                      v.id,
-                      v.name +
-                        (p.sale_type === "stock"
-                          ? " · " + v.stock_quantity + " disponibles"
-                          : ""),
-                    ]),
-                  )}${field("quantity", "Cantidad", "number", 1, 'required min="1" max="' + (p.sale_type === "stock" ? Math.min(100, available[0].stock_quantity) : 100) + '"')}${textarea("note", "Nota para tu pedido")}`,
+                  `<input type="hidden" name="product_id" value="${p.id}"><div class="field"><label for="f-variant">Elige tu opción</label><select id="f-variant" name="variant_id">${available
+                    .map(
+                      (v) =>
+                        `<option value="${v.id}" data-stock="${p.sale_type === "stock" ? v.stock_quantity : 100}">${esc(
+                          v.name +
+                            (p.sale_type === "stock"
+                              ? " · " + v.stock_quantity + " disponibles"
+                              : ""),
+                        )}</option>`,
+                    )
+                    .join("")}</select></div>${field("quantity", "Cantidad", "number", 1, 'required min="1" max="' + (p.sale_type === "stock" ? Math.min(100, available[0].stock_quantity) : 100) + '"')}${textarea("note", "Nota para tu pedido")}`,
                   "Confirmar pedido",
                 )
               : '<div class="notice">La administradora está preparando las opciones de este producto.</div>'
-          : btn("Inicia sesión para pedir", "login-close")
+            : btn("Inicia sesión para pedir", "login-close")
         : '<div class="notice">Esta colección ya cerró.</div>'
     }`,
   );
@@ -1938,11 +1938,23 @@ document.addEventListener("input", (e) => {
   }
 });
 document.addEventListener("change", (e) => {
-  if (e.target.name === "variant_id") {
+ if (e.target.name === "variant_id" && e.target.closest('form[data-form="purchase"]')) {
     const f = e.target.closest("form");
-    const p = rows("products").find(
-      (x) => x.id === f?.querySelector("[name=product_id]")?.value,
-    );
+    const opt = e.target.selectedOptions[0];
+    const max = Math.max(1, Math.min(100, Number(opt?.dataset.stock || 100)));
+    const qty = f.querySelector('input[name="quantity"]');
+    if (qty) {
+      qty.max = String(max);
+      if (Number(qty.value) > max) qty.value = String(max);
+    }
+  }
+  if (e.target.name === "quantity" && e.target.closest('form[data-form="purchase"]')) {
+    const max = Number(e.target.max || 100);
+    if (Number(e.target.value) > max) {
+      e.target.value = String(max);
+      toast(`Solo hay ${max} unidad(es) disponible(s) de esta opción.`);
+    }
+  }
     const v = rows("product_variants").find((x) => x.id === e.target.value);
     const q = f?.querySelector("[name=quantity]");
     if (q && p?.sale_type === "stock") {
