@@ -1937,11 +1937,12 @@ document.addEventListener("input", (e) => {
     n?.setSelectionRange(start, start);
   }
 });
-    if (Number(e.target.value) > max) {
-      e.target.value = String(max);
-      toast(`Solo hay ${max} unidad(es) disponible(s) de esta opción.`);
-    }
-  }
+document.addEventListener("change", (e) => {
+  if (e.target.name === "variant_id") {
+    const f = e.target.closest("form");
+    const p = rows("products").find(
+      (x) => x.id === f?.querySelector("[name=product_id]")?.value,
+    );
     const v = rows("product_variants").find((x) => x.id === e.target.value);
     const q = f?.querySelector("[name=quantity]");
     if (q && p?.sale_type === "stock") {
