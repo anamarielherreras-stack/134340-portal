@@ -1956,7 +1956,7 @@ document.addEventListener("change", (e) => {
       e.target.value = String(max);
       toast(`Solo hay ${max} unidad(es) disponible(s) de esta opción.`);
     }
-  });
+  }
 async function start() {
   const h = new URLSearchParams(location.hash.slice(1));
   if (h.has("error") || h.has("error_code")) {
