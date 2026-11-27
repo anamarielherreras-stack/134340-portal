@@ -919,13 +919,25 @@ async function openProduct(id) {
     }`,
   );
 }
-
+const PRODUCT_CATEGORIES = [
+  ["K-pop / Álbumes", "K-pop / Álbumes"],
+  ["Merch Oficial", "Merch Oficial"],
+  ["Fanmade / Réplicas", "Fanmade / Réplicas"],
+  ["Skincare / Belleza", "Skincare / Belleza"],
+  ["Papelería / Accesorios", "Papelería / Accesorios"],
+  ["Mercari / Segunda mano", "Mercari / Segunda mano"],
+  ["Personalizados", "Personalizados"],
+];
 function productForm(p = {}) {
+  const cats =
+    p.category && !PRODUCT_CATEGORIES.some(([v]) => v === p.category)
+      ? [[p.category, p.category], ...PRODUCT_CATEGORIES]
+      : PRODUCT_CATEGORIES;
   showModal(
     p.id ? "Editar producto" : "Nueva colección",
     form(
       "product",
-      `<input type="hidden" name="id" value="${esc(p.id || "")}"><div class="form-grid">${field("name", "Nombre del producto", "text", p.name, 'required maxlength="200"')}${field("sku", "SKU / código", "text", p.sku)}${field("category", "Categoría", "text", p.category)}${select(
+      `<input type="hidden" name="id" value="${esc(p.id || "")}"><div class="form-grid">${field("name", "Nombre del producto", "text", p.name, 'required maxlength="200"')}${field("sku", "SKU / código", "text", p.sku)}${select("category", "Categoría", cats, p.category || PRODUCT_CATEGORIES[0][0])}${select(
         "sale_type",
         "Tipo",
         [
