@@ -918,6 +918,7 @@ async function openProduct(id) {
         : '<div class="notice">Esta colección ya cerró.</div>'
     }`,
   );
+if (p.origin_type === "international") warnInternationalProduct();
 }
 const PRODUCT_CATEGORIES = [
   ["K-pop / Álbumes", "K-pop / Álbumes"],
@@ -928,6 +929,17 @@ const PRODUCT_CATEGORIES = [
   ["Mercari / Segunda mano", "Mercari / Segunda mano"],
   ["Personalizados", "Personalizados"],
 ];
+function warnInternationalProduct() {
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;inset:0;background:rgba(34,27,53,.55);display:flex;align-items:center;justify-content:center;padding:18px;z-index:99999";
+  box.innerHTML = `<div style="background:#fff;border-radius:20px;max-width:400px;width:100%;padding:22px;box-shadow:0 18px 40px rgba(34,27,53,.28);text-align:center">
+    <h3 style="margin:0 0 10px;color:#5b4b8a">🌎 Aviso de Compra Internacional</h3>
+    <p style="font-size:14px;line-height:1.5;color:#4a3f6b;margin:0 0 18px">Esta compra es internacional por lo que el precio publicado no es el precio final. Durante el proceso de compra se añadirán dos pagos más: <b>EMS</b> y <b>Aduana</b>.</p>
+    <button type="button" class="btn" style="width:100%">Entendido, continuar</button>
+  </div>`;
+  box.querySelector("button").onclick = () => box.remove();
+  document.body.appendChild(box);
+}
 function productForm(p = {}) {
   const cats =
     p.category && !PRODUCT_CATEGORIES.some(([v]) => v === p.category)
@@ -937,7 +949,15 @@ function productForm(p = {}) {
     p.id ? "Editar producto" : "Nueva colección",
     form(
       "product",
-      `<input type="hidden" name="id" value="${esc(p.id || "")}"><div class="form-grid">${field("name", "Nombre del producto", "text", p.name, 'required maxlength="200"')}${field("sku", "SKU / código", "text", p.sku)}${select("category", "Categoría", cats, p.category || PRODUCT_CATEGORIES[0][0])}${select(
+      `<input type="hidden" name="id" value="${esc(p.id || "")}"><div class="form-grid">${field("name", "Nombre del producto", "text", p.name, 'required maxlength="200"')}${field("sku", "SKU / código", "text", p.sku)}${select("category", "Categoría", cats, p.category || PRODUCT_CATEGORIES)}${select(
+        "origin_type",
+        "Origen de compra",
+        [
+          ["national", "Compra Nacional"],
+          ["international", "Compra Internacional"],
+        ],
+        p.origin_type || "national",
+      )}${select(
         "sale_type",
         "Tipo",
         [
@@ -1426,6 +1446,7 @@ async function handleForm(f) {
         name: v.name.trim(),
         sku: v.sku.trim() || null,
         category: v.category.trim() || null,
+        origin_type: v.origin_type || "national",
         sale_type: v.sale_type,
         status: v.status,
         price: Number(v.price),
